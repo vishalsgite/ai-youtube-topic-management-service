@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI | Multi-Agent Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a, #000000);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+        }
+
+        .glow-button {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Sticky Note Disclaimer for corner */
+        .sticky-disclaimer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            max-width: calc(100vw - 40px);
+            z-index: 1000;
+            background: rgba(30, 41, 59, 0.95);
+            border-left: 4px solid #3b82f6;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 640px) {
+            .sticky-disclaimer {
+                bottom: 10px;
+                right: 10px;
+                width: calc(100vw - 20px);
+            }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen pb-24 lg:pb-12">
+
+<div id="disclaimerNote" class="sticky-disclaimer glass-panel p-4 animate__animated animate__fadeInRight">
+    <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-3">
+            <i data-lucide="shield-alert" class="text-blue-400 w-5 h-5 shrink-0"></i>
+            <div>
+                <span class="block text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">Project Disclaimer</span>
+                <p class="text-[11px] leading-relaxed text-slate-300">
+                    Nexus AI is a proof-of-concept for <strong>Spring Boot & Kafka</strong>.
+                    Insights from <strong>Llama-3 & Grok</strong> are synthesized and may not be factually accurate.
+                </p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('disclaimerNote').remove()" class="text-slate-500 hover:text-white transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+</div>
+
+<div class="max-w-6xl mx-auto px-4 py-8 lg:py-12">
+    <header class="text-center mb-8 lg:mb-12 animate__animated animate__fadeInDown">
+        <div class="inline-flex p-3 rounded-2xl bg-blue-500/10 mb-4">
+            <i data-lucide="cpu" class="text-blue-400 w-6 h-6 lg:w-8 lg:h-8"></i>
+        </div>
+        <h1 class="text-3xl lg:text-5xl font-bold mb-2 text-white">Nexus<span class="gradient-text">AI</span></h1>
+        <p class="text-slate-400 text-sm lg:text-base font-light italic px-4">Cross-Video Multi-Agent Intelligence Pipeline</p>
+    </header>
+
+    <div class="glass-panel p-2 mb-8 lg:mb-12 animate__animated animate__fadeInUp">
+        <div class="flex flex-col md:flex-row gap-2">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                <input type="text" id="queryInput"
+                       placeholder="Topic e.g: Budget 2026 tax reforms"
+                       class="w-full pl-12 pr-4 py-3 lg:py-4 rounded-xl bg-slate-900/50 border border-slate-700 focus:outline-none focus:border-blue-500 transition-all text-base lg:text-lg text-white">
+            </div>
+            <button onclick="submitTopic()" id="btnSubmit"
+                    class="glow-button bg-blue-600 hover:bg-blue-500 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+                <span class="text-sm lg:text-base whitespace-nowrap">Synthesize Intel</span>
+                <i data-lucide="sparkles" class="w-4 h-4 lg:w-5 lg:h-5"></i>
+            </button>
+        </div>
+
+        <div id="statusContainer" class="hidden px-4 py-3 flex items-center justify-between border-t border-slate-700/50 mt-2">
+            <div class="flex items-center gap-3">
+                <div class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </div>
+                <span id="statusText" class="text-xs lg:text-sm font-medium text-slate-300">Orchestrating...</span>
+            </div>
+            <span id="timer" class="text-[10px] font-mono text-slate-500">00:00s</span>
+        </div>
+    </div>
+
+    <div id="results" class="hidden space-y-6 lg:space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="lg:col-span-8 glass-panel p-6 lg:p-8 animate__animated animate__fadeInLeft border-l-4 border-blue-500">
+                <div class="flex items-center gap-2 mb-4 lg:mb-6 text-blue-400">
+                    <i data-lucide="file-text" class="w-4 h-4 lg:w-5 lg:h-5"></i>
+                    <h2 class="uppercase tracking-widest text-[10px] font-bold">Consensus Summary</h2>
+                </div>
+                <p id="summary" class="text-lg lg:text-2xl leading-relaxed text-slate-100 font-light"></p>
+            </div>
+
+            <div class="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6 animate__animated animate__fadeInRight">
+                <div class="glass-panel p-5 lg:p-6 flex flex-col justify-between border-b-4 border-purple-500/40">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-slate-400 text-[9px] lg:text-[10px] uppercase font-bold tracking-widest">Sentiment</span>
+                        <i data-lucide="bar-chart-3" class="text-purple-400 w-4 h-4"></i>
+                    </div>
+                    <div class="text-lg lg:text-xl font-bold text-slate-100" id="sentimentText">--</div>
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div id="sentimentBar" class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-5 lg:p-6 flex flex-col justify-center border-b-4 border-emerald-500/40">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-400 text-[9px] lg:text-[10px] uppercase font-bold tracking-widest">Consensus Score</span>
+                        <i data-lucide="shield-check" class="text-emerald-400 w-4 h-4"></i>
+                    </div>
+                    <div class="text-3xl lg:text-4xl font-bold gradient-text" id="consensusVal">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="animate__animated animate__fadeInUp pt-4">
+            <h3 class="text-lg lg:text-xl font-bold mb-6 flex items-center gap-2 text-slate-200">
+                <i data-lucide="play-circle" class="text-red-500"></i> Source Intelligence
+            </h3>
+            <div id="highlightsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left"></div>
+        </div>
+    </div>
+</div>
+
+<footer class="max-w-6xl mx-auto px-4 pb-12 mt-8 text-center border-t border-slate-800 pt-8 text-slate-500 text-[10px] lg:text-xs">
+    <p>© 2026 Nexus AI Architecture | vshlsgite.98.vg@gmail.com</p>
+</footer>
+
+<script>
+    lucide.createIcons();
+
+    // BACKTICK SYNTAX: Critical for IP address detection
+    const BASE_URL = `http://${window.location.hostname}:8080/api/v1/topics`;
+
+    let pollInterval;
+    let secondsElapsed = 0;
+    let timerInterval;
+
+    function startTimer() {
+        secondsElapsed = 0;
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            secondsElapsed++;
+            const secs = secondsElapsed % 60;
+            const mins = Math.floor(secondsElapsed / 60);
+            document.getElementById('timer').innerText =
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}s`;
+        }, 1000);
+    }
+
+    function timeToSeconds(timeStr) {
+        if (!timeStr || typeof timeStr !== 'string') return 0;
+        const parts = timeStr.replace(/[^0-9:]/g, '').split(':').reverse();
+        let seconds = 0;
+        if (parts[0]) seconds += parseInt(parts[0], 10);
+        if (parts[1]) seconds += parseInt(parts[1], 10) * 60;
+        return seconds;
+    }
+
+    async function submitTopic() {
+        const query = document.getElementById('queryInput').value;
+        if (!query) return;
+
+        document.getElementById('results').classList.add('hidden');
+        document.getElementById('statusContainer').classList.remove('hidden');
+        document.getElementById('statusText').innerText = "Orchestrating Agents...";
+        document.getElementById('highlightsList').innerHTML = "";
+
+        startTimer();
+
+        try {
+            const response = await fetch(BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            });
+            const data = await response.json();
+            startPolling(data.topicId);
+        } catch (error) {
+            console.error("Link Failure:", error);
+            document.getElementById('statusText').innerText = "Backend Offline";
+        }
+    }
+
+    function startPolling(topicId) {
+        pollInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/${topicId}`);
+                const data = await response.json();
+
+                if (data.videoHighlights && data.videoHighlights.length > 0) {
+                    document.getElementById('results').classList.remove('hidden');
+                    updateHighlightCards(data.videoHighlights);
+                }
+
+                if(data.status === 'EXTRACTING') document.getElementById('statusText').innerText = "Gathering Transcripts...";
+                if(data.status === 'ANALYZING') document.getElementById('statusText').innerText = "Synthesizing Consensus...";
+
+                if (data.status === 'COMPLETED') {
+                    clearInterval(pollInterval);
+                    clearInterval(timerInterval);
+                    document.getElementById('statusContainer').classList.add('hidden');
+                    finalizeUI(data);
+                } else if (data.status === 'FAILED') {
+                    clearInterval(pollInterval);
+                    clearInterval(timerInterval);
+                    document.getElementById('statusText').innerText = "Pipeline error occurred.";
+                }
+            } catch (error) {
+                console.error("Polling error:", error);
+            }
+        }, 2000);
+    }
+
+    function updateHighlightCards(highlights) {
+        const list = document.getElementById('highlightsList');
+        list.innerHTML = "";
+
+        highlights.forEach((h, idx) => {
+            const seconds = timeToSeconds(h.timestamp);
+            const videoJumpLink = `${h.videoUrl}&t=${seconds}`;
+
+            const card = `
+                <div class="glass-panel p-4 border-l-4 border-slate-700 hover:border-blue-500 transition-all group animate__animated animate__fadeIn">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-blue-400 font-mono text-[8px] lg:text-[9px] uppercase tracking-widest opacity-60">Source ${idx+1}</span>
+                        <a href="${videoJumpLink}" target="_blank"
+                           class="flex items-center gap-1 text-[8px] lg:text-[10px] bg-red-600/10 text-red-500 border border-red-500/20 px-2 lg:px-3 py-1 rounded-full hover:bg-red-600 hover:text-white transition">
+                           PLAY @ ${h.timestamp}
+                        </a>
+                    </div>
+                    <p class="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">${h.videoTitle || 'Source'}</p>
+                    <h4 class="font-bold text-base lg:text-lg text-slate-100 mb-2 leading-tight group-hover:text-blue-400 transition-colors">${h.summary || 'Analyzing...'}</h4>
+                    <p class="text-xs text-slate-400 font-light">${h.explanation || 'Extracting context...'}</p>
+                </div>
+            `;
+            list.innerHTML += card;
+        });
+        lucide.createIcons();
+    }
+
+    function finalizeUI(data) {
+        document.getElementById('summary').innerText = data.summary || "Ready.";
+        const sentiment = data.sentimentScore > 0.5 ? "Positive Insight" : "Critical Viewpoint";
+        document.getElementById('sentimentText').innerText = sentiment;
+        document.getElementById('sentimentBar').style.width = `${(data.sentimentScore || 0) * 100}%`;
+        document.getElementById('consensusVal').innerText = `${Math.round(data.consensusPercentage || 0)}%`;
+    }
+</script>
+</body>
+</html>
