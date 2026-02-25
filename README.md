@@ -44,7 +44,7 @@ This service acts as the bridge between raw event streams and structured data st
 ### Installation & Run
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/your-username/topic-management-service.git](https://github.com/your-username/topic-management-service.git)
+    git clone [https://github.com/vishalsgite/ai-youtube-topic-management-service.git)
     cd topic-management-service
     ```
 
